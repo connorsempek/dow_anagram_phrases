@@ -7,6 +7,7 @@
 # -----------------------------------------------------------------------------
 # imports
 
+import argparse
 import datetime as dt
 import itertools
 import operator
@@ -88,17 +89,20 @@ def all_anagram_phrases(s, tups):
     return phrases
 
 
-def load_dictionary():
+def load_dictionary(dict_path='/usr/share/dict/words'):
 
     # read in dictionary
-    with open('/usr/share/dict/words', 'r') as f:
+    with open(dict_path, 'r') as f:
         dictionary = f.readlines()
     dictionary = set([w.lower().strip() for w in dictionary])
 
     # remove non-word single letters
-    good_singles = set(['a', 'i', 'o'])
-    bad_singles = set([w for w in dictionary if len(w) == 1 and w not in good_singles])
-    return set([w for w in dictionary if w not in bad_singles])
+    if dict_path == '/usr/share/dict/words':
+        good_singles = set(['a', 'i', 'o'])
+        bad_singles = set([w for w in dictionary if len(w) == 1 and w not in good_singles])
+        dictionary = set([w for w in dictionary if w not in bad_singles]) 
+
+    return dictionary
 
 
 def is_phrase_legit(phrase, dictionary):
@@ -129,12 +133,17 @@ def get_legit_anagram_phrases(s, dictionary):
 
 if __name__  == '__main__':
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dict_path', help='file path to dictionary', 
+        type=str, default='/usr/share/dict/words')
+    args = parser.parse_args()
+
     # get day names
     dows = [(dt.date.today() + dt.timedelta(days=i)).strftime('%A').lower()
             for i in range(7)]
 
     # load simple english dictionary
-    dictionary = load_dictionary()
+    dictionary = load_dictionary(args.dict_path)
 
     # find anagram phrases and write to text find for each day name
     for dow in dows:
